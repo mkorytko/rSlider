@@ -4,12 +4,12 @@
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
+  height: 20vmin;
 }
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  padding: 50px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -29,4 +29,9 @@
   to {
     transform: rotate(360deg);
   }
+}
+.slider-container{
+  border: 1px solid black;
+  height: 300px;
+  margin-top: 50px;;
 }
