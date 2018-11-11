@@ -1,14 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-
-const styles = {
-    sliderItemContent: {
-        width: "100%",
-        height: "100%",
-        boxSizing: "border-box",
-        userSelect: "none",
-    }
-}
+import styles from "./styles/main";
 
 class Slider extends Component {
     state = {
@@ -51,10 +43,9 @@ class Slider extends Component {
             // изменение размера экрана
             //console.log(e.target.screen.width)
         })
-        
     }
 
-    mouseEvent = (e) => {
+    touchEvent = (e) => {
         return {
             onTouchStart: e => {
                 this.mark.start = e.touches[0].pageX;
@@ -101,9 +92,8 @@ class Slider extends Component {
     selectIndex = (i) => this.setState(() => ({slideIndex: i}));
     
     render(){
-        const mouseEvent = this.mouseEvent();
+        const mouseEvent = this.touchEvent();
         const { contents, sliderLengts, showSize, itemStyle, slideIndex } = this.state;
-        // const styleIs = {transform: `translateX(${this.state.mark.move}px)`, width: `${sliderLengts}`, transition: "transform .05s"};
         const styleIs = {transform: `translateX(${this.state.mark.move}px)`, width: `${sliderLengts}`};
         return (
             <React.Fragment>
