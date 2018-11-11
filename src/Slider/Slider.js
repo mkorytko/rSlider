@@ -1,22 +1,58 @@
 import React, { Component } from "react";
-import SliderContainer from './Container';
-import img_1 from "./assets/1.jpg";
-import img_2 from "./assets/2.jpg";
-import img_3 from "./assets/3.jpg";
-import img_4 from "./assets/4.jpg";
+import PropTypes from "prop-types";
+
+const styles = {
+    sliderItemContent: {
+        width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+        userSelect: "none",
+    }
+}
 
 class Slider extends Component {
     state = {
+        contents: [],
         mark: {
             start: null, //начало тача
             move: null, // расстояние от старта тача
             direction: null, // направление движения -1 - справа налево / 1 - слева направо
             end: null, // отпускание пальца
             stop: null, // маркер конца пройденного расстояния move
-        }
+        },
+        slideIndex: 0,
+        sliderLengts: 0,
+        slidesShow: this.props.slidesShow || 5, //сколько видно контента
+        showSize: null, // длина главного контейнера с контентом
+        slideTheEnd: null, // расчёт конечной длины трансформа
+        contentWidth: this.props.widthItem || 200,
+        itemStyle: {},
+        /*TODO:
+        slidesHeight: null, // высота контента 
+        */
     }
     
     mark = Object.create(null);
+
+    componentDidMount() {
+        const { slidesShow, contentWidth } = this.state;
+        this.windowSize();
+        this.setState({
+            contents: this.props.contents,
+            sliderLengts: this.props.contents.length * contentWidth + "px",
+            showSize: slidesShow * contentWidth + "px",
+            slideTheEnd: (this.props.contents.length - slidesShow) * contentWidth,
+            itemStyle: {width: contentWidth, height: "120px"},
+        })
+    }
+
+    windowSize = () => {
+        window.addEventListener("resize", (e) => {
+            // изменение размера экрана
+            //console.log(e.target.screen.width)
+        })
+        
+    }
 
     mouseEvent = (e) => {
         return {
@@ -25,13 +61,24 @@ class Slider extends Component {
             },
             onTouchMove: e => {
                 if (!this.mark.stop) {
-                    this.mark.move = e.touches[0].pageX - this.mark.start;    
+                    if (e.touches[0].pageX - this.mark.start <= 0) {
+                        this.mark.move = e.touches[0].pageX - this.mark.start;
+                    } else {
+                        this.mark.move = 0;
+                    }
                 } else {
-                    this.mark.move = this.mark.stop + (e.touches[0].pageX - this.mark.start);
+                    if (this.mark.stop + (e.touches[0].pageX - this.mark.start) > 0) {
+                        this.mark.move = 0;
+                    } else if (this.mark.stop + (e.touches[0].pageX - this.mark.start) < (-this.state.slideTheEnd)) {
+                        this.mark.move = (-this.state.slideTheEnd);
+                    }
+                    else {
+                        this.mark.move = this.mark.stop + (e.touches[0].pageX - this.mark.start);
+                    }
                 }
                 this.mark.direction = (this.mark.start - e.touches[0].pageX) > 0 ? -1 : 1;
                 this.setState({
-                    mark:{
+                    mark: {
                         move: this.mark.move,
                     }
                 });
@@ -51,46 +98,43 @@ class Slider extends Component {
         };
     }
 
-    moveTarget = (el) => {
-
-    }
-
-
+    selectIndex = (i) => this.setState(() => ({slideIndex: i}));
+    
     render(){
         const mouseEvent = this.mouseEvent();
-        //console.log(this.state.mark)
-        const styleIs = {transform: `translateX(${this.state.mark.move}px)`};
+        const { contents, sliderLengts, showSize, itemStyle, slideIndex } = this.state;
+        // const styleIs = {transform: `translateX(${this.state.mark.move}px)`, width: `${sliderLengts}`, transition: "transform .05s"};
+        const styleIs = {transform: `translateX(${this.state.mark.move}px)`, width: `${sliderLengts}`};
         return (
             <React.Fragment>
-                <SliderContainer>
-                    <div className="slides-wrapper" {...mouseEvent}>
-                        <div 
-                        className="slider-box"  style={styleIs}>
-                            <div className="slider-item"></div>
-                            <div className="slider-item"></div>
-                            <div className="slider-item"></div>
-                            <div className="slider-item"></div>
-                            <div className="slider-item">
-                                <img src={img_1} alt="car"/>
-                            </div>
-                            <div className="slider-item">
-                                <img src={img_2} alt="car"/>
-                            </div>
-                            <div className="slider-item">
-                                <img src={img_3} alt="car"/>
-                            </div>
-                            <div className="slider-item">
-                                <img src={img_4} alt="car"/>
-                            </div>
-                            <div className="slider-item"></div>
-                            <div className="slider-item"></div>
-                            <div className="slider-item"></div>
+                <div
+                    style={{width: showSize}}
+                    className="slider-container"
+                    {...mouseEvent}>
+                    <div className="slider-line" style={styleIs}>
+                        <div className="slider-box" >
+                            {contents.map((els, i)=> (
+                                <div 
+                                    key={i} style={Object.assign({}, itemStyle)}>
+                                    <img
+                                        className={`slider-item${slideIndex === i ? ' active' : ''}`}
+                                        style={styles.sliderItemContent}
+                                        src={els}
+                                        data-slide={i}
+                                        onClick={() => this.selectIndex(i)} />
+                                </div>
+                            ))}
                         </div>
                     </div>
-                </SliderContainer>
+                </div>
             </React.Fragment>
         )
     }
+}
+
+Slider.propTypes = {
+    slidesShow: PropTypes.string,
+    widthItem: PropTypes.string,
 }
 
 export default Slider;
